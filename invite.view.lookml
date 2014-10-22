@@ -8,7 +8,7 @@
 
   - dimension_group: clicked
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.clickedAt
 
   - dimension:  did_click
@@ -18,15 +18,18 @@
   - dimension: client_recipient_number
     sql: ${TABLE}.clientRecipientNumber
 
-  - dimension: copy
+  - dimension: full_copy
     sql: ${TABLE}.copy
 
+  - dimension: copy
+    sql: SUBSTRING_INDEX(${TABLE}.copy, 'http',1)
+    
   - dimension: domain
     sql: ${TABLE}.domain
 
   - dimension_group: initiated
     type: time
-    timeframes: [time, date, week, month]
+    timeframes: [time, hour, date, week, month]
     sql: ${TABLE}.initiatedAt
 
   - dimension:  did_initiate
