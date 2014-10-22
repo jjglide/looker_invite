@@ -4,7 +4,7 @@
   fields:
 
   - dimension: carrier
-    sql: ${TABLE}.carrier
+    sql: trim(${TABLE}.carrier)
 
   - dimension_group: clicked
     type: time
@@ -18,6 +18,10 @@
   - dimension: client_recipient_number
     sql: ${TABLE}.clientRecipientNumber
 
+
+  - dimension: recipient_area_code
+    sql: substring(${client_recipient_number} from 3 for 3)
+    
   - dimension: full_copy
     sql: ${TABLE}.copy
 
