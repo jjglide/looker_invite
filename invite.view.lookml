@@ -74,12 +74,14 @@
     sql: ${TABLE}.registeredAt
     
   - dimension: status
-    type: yesno
+    type: number
     sql: ${TABLE}.status
 
   - dimension: type
-    type: yesno
-    sql: ${TABLE}.type
+    sql_case:
+      bulk: ${TABLE}.type=0
+      cherry_pick: ${TABLE}.type=1
+      pseudo: ${TABLE}.type=4
 
   - dimension_group: updated
     type: time
