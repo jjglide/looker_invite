@@ -76,13 +76,29 @@
   - dimension: status
     type: number
     sql: ${TABLE}.status
-
+  - dimension: pseudo_type
+    sql_case:
+      one_on_one: ${TABLE}.copy LIKE '%I just sent%'
+      group:  ${TABLE}.copy LIKE '%chat in the group%'
+      else: null
+      
   - dimension: type
     sql_case:
       bulk: ${TABLE}.type=0
       cherry_pick: ${TABLE}.type=1
       pseudo: ${TABLE}.type=4
-
+  - dimension: number_length
+    sql:  CHAR_LENGTH(${client_recipient_number})
+    
+  - dimension: bad_number
+    sql:  |
+        (CASE WHEN ${TABLE}.status NOT IN (1) THEN 'true' 
+         WHEN ${recipient_area_code} IN ('800','888') THEN 'true' 
+         WHEN ${number_length}<7 THEN 'true' 
+        ELSE 'false' 
+        END)
+     
+      
   - dimension_group: updated
     type: time
     timeframes: [time, date, week, month]
@@ -91,6 +107,18 @@
   - measure: count
     type: count
     drill_fields: []
+
+  - measure: sender_count
+    type: count_distinct
+    sql:  ${TABLE}.invitorId
+    
+  - measure:  invites_per_sender
+    type: number
+    sql: ${count}/${sender_count}
+    
+  - measure: registrations_per_hundred_senders
+    type: number
+    sql:  100*${count_registered}/${sender_count}
     
   - measure: count_registered
     type: count
