@@ -20,8 +20,13 @@
 
 
   - dimension: recipient_area_code
-    sql: substring(${client_recipient_number} from 3 for 3)
-    
+    sql: |
+        greatest(
+        cast(substring(cast(${client_recipient_number} as signed) from 3 for 3) as signed),
+        cast(substring(cast(${client_recipient_number} as signed) from 2 for 3) as signed), 
+        cast(substring(cast(${client_recipient_number} as signed) from 1 for 3) as signed))
+
+            
   - dimension: full_copy
     sql: ${TABLE}.copy
 
@@ -75,7 +80,11 @@
     
   - dimension: status
     type: number
-    sql: ${TABLE}.status
+    sql: cast(${TABLE}.status AS signed)
+    
+  - dimension: status_error
+    type: yesno
+    sql:  ${status} !=1
   - dimension: pseudo_type
     sql_case:
       one_on_one: ${TABLE}.copy LIKE '%I just sent%'
@@ -92,9 +101,9 @@
     
   - dimension: bad_number
     sql:  |
-        (CASE WHEN ${TABLE}.status NOT IN (1) THEN 'true' 
-         WHEN ${recipient_area_code} IN ('800','888') THEN 'true' 
-         WHEN ${number_length}<7 THEN 'true' 
+        (CASE WHEN ${status} !=1 THEN 'true' 
+         WHEN ${recipient_area_code} IN ('800','888','866','326') THEN 'true' 
+         WHEN ${number_length}<10 THEN 'true' 
         ELSE 'false' 
         END)
      

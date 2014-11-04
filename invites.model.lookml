@@ -7,3 +7,4 @@
 
 
 - base_view: invite
+  persist_for: 8 hours
