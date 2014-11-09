@@ -82,13 +82,20 @@
     type: number
     sql: cast(${TABLE}.status AS signed)
     
+  - dimension: registered_within_48_hours
+    type: yesno
+    sql: timediff(${TABLE}.registeredAt,${TABLE}.initiatedAt)<'48:00:00'
+
+  - dimension:  batch_registered
+    type: yesno
+    sql:   ${did_register} AND NOT ${did_click}
   - dimension: status_error
     type: yesno
     sql:  ${status} !=1
   - dimension: pseudo_type
     sql_case:
-      one_on_one: ${TABLE}.copy LIKE '%I just sent%'
-      group:  ${TABLE}.copy LIKE '%chat in the group%'
+      one_on_one: ${TABLE}.copy NOT LIKE '%group%' AND ${type}='pseudo'
+      group:  ${TABLE}.copy LIKE '%group%' AND ${type}='pseudo'
       else: null
       
   - dimension: type
@@ -127,13 +134,19 @@
     
   - measure: registrations_per_hundred_senders
     type: number
-    sql:  100*${count_registered}/${sender_count}
+    sql:  100.0*${count_registered}/${sender_count}
+    decimals: 2
     
   - measure: count_registered
     type: count
     filters:
       did_register: yes
 
+  - measure: count_registered_48_hours
+    type: count
+    filters:
+      registered_within_48_hours: yes
+      did_register: yes
   - measure: count_installed
     type: count
     filters:
@@ -158,6 +171,12 @@
     type: number
     decimals: 1
     sql:  100.0* ${count_registered}/${count}
+
+
+  - measure:  registration_rate_48_hours
+    type: number
+    decimals: 1
+    sql:  100.0* ${count_registered_48_hours}/${count}
     
   - measure:  click_to_install_rate
     type: number
