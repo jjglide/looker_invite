@@ -4,7 +4,7 @@
   fields:
 
   - dimension: carrier
-    sql: trim(${TABLE}.carrier)
+    sql: lcase(trim(${TABLE}.carrier))
 
   - dimension_group: clicked
     type: time
@@ -85,7 +85,12 @@
   - dimension: registered_within_48_hours
     type: yesno
     sql: timediff(${TABLE}.registeredAt,${TABLE}.initiatedAt)<'48:00:00'
-
+  - dimension: clicked_within_24_hours
+    type: yesno
+    sql: timediff(${TABLE}.clickedAt,${TABLE}.initiatedAt)<'24:00:00'
+  - dimension: clicked_within_1_hour
+    type: yesno
+    sql: timediff(${TABLE}.initiatedAt,${TABLE}.clickedAt)<'01:00:00'  
   - dimension:  batch_registered
     type: yesno
     sql:   ${did_register} AND NOT ${did_click}
@@ -147,6 +152,17 @@
     filters:
       registered_within_48_hours: yes
       did_register: yes
+  - measure: count_clicked_24_hours
+    type: count
+    filters:
+      clicked_within_24_hours: yes
+      did_click: yes
+  - measure: count_clicked_1_hour
+    type: count
+    filters:
+      clicked_within_1_hour: yes
+      did_click: yes
+
   - measure: count_installed
     type: count
     filters:
@@ -177,6 +193,15 @@
     type: number
     decimals: 1
     sql:  100.0* ${count_registered_48_hours}/${count}
+  - measure:  click_rate_24_hours
+    type: number
+    decimals: 1
+    sql:  100.0* ${count_clicked_24_hours}/${count}
+
+  - measure:  click_rate_1_hour
+    type: number
+    decimals: 1
+    sql:  100.0* ${count_clicked_1_hour}/${count}
     
   - measure:  click_to_install_rate
     type: number
