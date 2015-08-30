@@ -9,3 +9,6 @@
 - base_view: invite
   persist_for: 8 hours
   
+- base_view: discover_profiles
+  
+  

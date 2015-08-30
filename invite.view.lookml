@@ -84,13 +84,13 @@
     
   - dimension: registered_within_48_hours
     type: yesno
-    sql: timediff(${TABLE}.registeredAt,${TABLE}.initiatedAt)<'48:00:00'
+    sql: timediff(${TABLE}.registeredAt,${TABLE}.initiatedAt)<'48:00:00' AND ${TABLE}.registeredAt>'00:00:00'
   - dimension: clicked_within_24_hours
     type: yesno
-    sql: timediff(${TABLE}.clickedAt,${TABLE}.initiatedAt)<'24:00:00'
+    sql: timediff(${TABLE}.clickedAt,${TABLE}.initiatedAt)<'24:00:00' AND ${TABLE}.clickedAt>'00:00:00'
   - dimension: clicked_within_1_hour
     type: yesno
-    sql: timediff(${TABLE}.initiatedAt,${TABLE}.clickedAt)<'01:00:00'  
+    sql: timediff(${TABLE}.clickedAt,${TABLE}.initiatedAt)<'01:00:00'  AND ${TABLE}.clickedAt>'00:00:00'
   - dimension:  batch_registered
     type: yesno
     sql:   ${did_register} AND NOT ${did_click}
